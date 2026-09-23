@@ -1,7 +1,16 @@
-import pandas as pd
-import csv
+path_input = "data/raw/2015.csv"
+output_folder = "outputs/"
 
-with open('2015.csv', mode='r', newline='', encoding='latin-1') as f:
-    reader = csv.reader(f)
-    column_names = next(reader)
-print(column_names)
+required_columns = ['tq', 'countryorigin_iso3', 'dutiablevaluephp']
+filter_values = {}
+grouping_columns = []
+
+config = {
+    "input_path": path_input,
+    "required_columns": required_columns,
+    "filter_values": filter_values,
+    "grouping_columns": grouping_columns,
+    "output_folder": output_folder,
+}
+
+print(config)
