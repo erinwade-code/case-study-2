@@ -57,7 +57,7 @@ if __name__ == "__main__":
     mock_config = {
         "FILTER_COL_1": "countryorigin_iso3",
         "FILTER_VAL_1": "CHN",
-        "FILTER_COL_2": "tq",
+        "FILTER_COL_2": "q",
         "FILTER_VAL_2": 0,
         "NUMERICAL_MEASURE": "dutiablevaluephp"
     }
