@@ -25,7 +25,23 @@ def filter_and_transform_data(
     mask = (df[col1] == val1) & (df[col2] > val2)
     filtered_df = df.loc[mask].copy()
 
-    if len(filtered_df) == 0:
+   if len(filtered_df) == 0:
         raise ValueError("Filter returned 0 rows.")
 
-    return filtered_df, rows_before - len(filtered_df)
+    # 2. Sort records by numerical measure (descending)
+    measure = config["NUMERICAL_MEASURE"]
+    filtered_df.sort_values(by=measure, ascending=False, inplace=True)
+
+    # 3. Derived Column 1 (Numeric): Estimated Duty in PHP
+    filtered_df["estimated_duty_php"] = filtered_df[measure] * duty_rate
+
+    # 4. Derived Column 2 (Category/Flag): High vs. Low Value
+    median_val = filtered_df[measure].median()
+    filtered_df["value_category_flag"] = np.where(
+        filtered_df[measure] >= median_val, "High_Value", "Low_Value"
+    )
+
+    rows_after = len(filtered_df)
+    excluded_rows = rows_before - rows_after
+
+    return filtered_df, excluded_rows
