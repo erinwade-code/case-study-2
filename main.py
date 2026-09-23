@@ -17,7 +17,6 @@ def validate_input(path: str) -> None:
     if not path.lower().endswith(".csv"):
         raise ValueError(f"Expected a .csv file, got: {path}")
  
-    # Peek at the header only, to fail fast before processing 2M+ rows
     header = pd.read_csv(path, nrows=0, encoding="latin1")
     missing = REQUIRED_COLUMNS - set(header.columns)
     if missing:
@@ -31,22 +30,19 @@ def process_in_chunks(path: str):
     for now), and accumulates partial aggregates per chunk so the full
     2.2M-row file is never held in memory at once.
     """
-    single_partials = []   # per-chunk group_by_single results
-    two_partials = []      # per-chunk group_by_two results
-    missing_counts: dict[str, dict[str, int]] = {}  # for the standalone function
+    single_partials = [] 
+    two_partials = [] 
+    missing_counts: dict[str, dict[str, int]] = {}  
  
     reader = pd.read_csv(
         path, chunksize=CHUNKSIZE, encoding="latin1", low_memory=False
     )
  
     for i, chunk in enumerate(reader, start=1):
-        # --- Work A / Work B would slot in here ---
-        # chunk = clean.clean_chunk(chunk)
  
         single_partials.append(transform.group_by_single(chunk))
         two_partials.append(transform.group_by_two(chunk))
  
-        # Running row_count / valid_count per country, for missing_value_report
         chunk_counts = chunk.groupby(transform.CAT_COL_1)[transform.MEASURE_COL].agg(
             row_count="size", valid_count="count"
         )
@@ -90,31 +86,24 @@ def main():
     validate_input(path)
  
     print("Processing file in chunks...")
-    single_partials, two_partials, port_sums = process_in_chunks(path)
+    single_partials, two_partials, missing_counts = process_in_chunks(path)
  
-    # Re-aggregate the partial (per-chunk) sums into final totals
     print("Combining chunk results...")
-    grouped = transform.group_by_single(pd.concat(single_partials, ignore_index=True))
-    grouped_two = transform.group_by_two(
-        pd.concat(two_partials, ignore_index=True),
-        group_cols=("countryorigin_iso3", "tm"),
-    )
-    pivot = transform.pivot_with_margins(
-        grouped_two, index="countryorigin_iso3", columns="tm", values="dutiestaxes"
-    )
+    grouped = combine_single(single_partials)
+    grouped_two = combine_two(two_partials)
+    pivot = transform.pivot_with_margins(grouped_two)
     top_10 = transform.top10(grouped)
-
-    duty_rates = transform.duty_rate_summary(port_sums)
-
-
+ 
+    missing_report = transform.missing_value_report(missing_counts)
+ 
     grouped.to_csv("grouped.csv", index=False)
     grouped_two.to_csv("grouped_two.csv", index=False)
     pivot.to_csv("pivot.csv")
     top_10.to_csv("top10.csv", index=False)
-    duty_rates.to_csv("duty_rate_summary.csv", index=False)
+    missing_report.to_csv("missing_value_report.csv", index=False)
  
-    print("Done. Wrote: grouped.csv, grouped_two.csv, pivot.csv, top10.csv, duty_rate_summary.csv")
- 
+    print("Done. Wrote: grouped.csv, grouped_two.csv, pivot.csv, top10.csv, missing_value_report.csv")
+
  
 if __name__ == "__main__":
     try:
