@@ -40,9 +40,9 @@ def pivot_with_margins(df: pd.DataFrame,
     )
     return pivot
 
-def top10(grouped_df: pd.DataFrame, value_col: str = "dutiestaxes") -> pd.DataFrame:
-    """Return the top 10 rows of an already-grouped DataFrame by value_col."""
-    return grouped_df.sort_values(value_col, ascending=False).head(10)
+def top10(grouped_df: pd.DataFrame, sum_col: str = "sum") -> pd.DataFrame:
+    """Return up to the top 10 rows of grouped_df sorted by sum_col."""
+    return grouped_df.sort_values(sum_col, ascending=False).head(10)
 
 def duty_rate_summary(port_sums: dict) -> pd.DataFrame:
     """
