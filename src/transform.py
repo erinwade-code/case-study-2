@@ -25,7 +25,7 @@ def filter_and_transform_data(
     mask = (df[col1] == val1) & (df[col2] > val2)
     filtered_df = df.loc[mask].copy()
 
-   if len(filtered_df) == 0:
+    if len(filtered_df) == 0:
         raise ValueError("Filter returned 0 rows.")
 
     # 2. Sort records by numerical measure (descending)
