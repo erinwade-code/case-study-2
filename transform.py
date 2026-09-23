@@ -44,22 +44,25 @@ def top10(grouped_df: pd.DataFrame, sum_col: str = "sum") -> pd.DataFrame:
     """Return up to the top 10 rows of grouped_df sorted by sum_col."""
     return grouped_df.sort_values(sum_col, ascending=False).head(10)
 
-def duty_rate_summary(port_sums: dict) -> pd.DataFrame:
+def missing_value_report(counts: dict, default_measure: str = MEASURE_COL) -> pd.DataFrame:
     """
-    Compute effective duty rate (dutiestaxes / dutiablevaluephp) per port.
+    Report how many rows had a missing measure value per group.
  
-    port_sums: dict like
-        {
-          "Port of Manila": {"dutiestaxes": 123.0, "dutiablevaluephp": 456.0},
-          ...
-        }
+    counts: dict like
+        {"CHN": {"row_count": 500, "valid_count": 498}, ...}
+    default_measure: label only, used in the output column name so the
+    report is self-describing (parameter has a default value).
     """
     rows = []
-    for port, sums in port_sums.items():
-        taxes = sums.get("dutiestaxes", 0)
-        value = sums.get("dutiablevaluephp", 0)
-        rate = (taxes / value) if value else 0
-        rows.append({"port": port, "dutiestaxes": taxes,
-                      "dutiablevaluephp": value, "effective_duty_rate": rate})
-    return pd.DataFrame(rows).sort_values("effective_duty_rate", ascending=False)
+    for group, c in counts.items():
+        row_count = c.get("row_count", 0)
+        valid_count = c.get("valid_count", 0)
+        missing = row_count - valid_count
+        rows.append({
+            "group": group,
+            "row_count": row_count,
+            "valid_count": valid_count,
+            f"missing_{default_measure}": missing,
+        })
+    return pd.DataFrame(rows).sort_values(f"missing_{default_measure}", ascending=False)
  
