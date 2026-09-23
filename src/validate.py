@@ -125,3 +125,77 @@ def build_validation_table(all_checks: list[dict[str, Any]]) -> pd.DataFrame:
 
 def save_validation_csv(validation_df: pd.DataFrame, output_folder: str) -> None:
     validation_df.to_csv(f"{output_folder}/validation.csv", index=False)
+
+
+
+class AuditLog:
+    """
+    Tracks pipeline operations for audit_log.csv.
+
+    Each entry records what step ran, what operation happened, what rule
+    it enforced, and how many rows existed before/after.
+    """
+
+    def __init__(self) -> None:
+        """Initialize an empty audit log."""
+        self.entries: list[dict[str, Any]] = []
+
+    def record(
+        self,
+        step: str,
+        operation: str,
+        rule: str,
+        rows_before: int,
+        rows_after: int
+    ) -> None:
+        """Add one entry to the audit log."""
+        self.entries.append({
+            "step": step,
+            "operation": operation,
+            "rule": rule,
+            "rows_before": rows_before,
+            "rows_after": rows_after,
+        })
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """Return all entries as a DataFrame."""
+        return pd.DataFrame(self.entries)
+
+    def save(self, output_folder: str) -> None:
+        """Write audit_log.csv to the configured output folder."""
+        self.to_dataframe().to_csv(f"{output_folder}/audit_log.csv", index=False)
+
+
+def run_all_validations(
+    raw_df: pd.DataFrame,
+    selected_df: pd.DataFrame,
+    excluded_df: pd.DataFrame,
+    grouped_df: pd.DataFrame,
+    pivot_df: pd.DataFrame,
+    loop_result: float,
+    vectorized_result: float,
+    output_folder: str
+) -> bool:
+    """
+    Run every required check, save validation.csv, and return whether
+    all checks passed.
+    """
+    all_checks = []
+    all_checks += check_reference_totals(raw_df)
+    all_checks.append(check_raw_equals_selected_plus_excluded(raw_df, selected_df, excluded_df))
+    all_checks.append(check_grouped_row_counts(selected_df, grouped_df))
+    all_checks.append(check_grouped_sum_matches_independent_sum(selected_df, grouped_df))
+    all_checks.append(check_pivot_interior_sum(selected_df, pivot_df))
+    all_checks.append(check_loop_vs_vectorized(loop_result, vectorized_result))
+
+    validation_df = build_validation_table(all_checks)
+    save_validation_csv(validation_df, output_folder)
+
+    all_passed = validation_df["pass"].all()
+
+    if not all_passed:
+        failed = validation_df[~validation_df["pass"]]
+        print("VALIDATION FAILED. Discrepancies found:")
+        print(failed.to_string(index=False))
+
+    return all_passed
