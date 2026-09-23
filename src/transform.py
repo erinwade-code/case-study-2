@@ -50,7 +50,7 @@ if __name__ == "__main__":
     print("Testing Work B transformation logic...")
     mock_data = pd.DataFrame({
         "countryorigin_iso3": ["CHN", "USA", "CHN", "CHN"],
-        "tq": [10, 5, 0, 25],
+        "q": [10, 5, 0, 25],
         "dutiablevaluephp": [100000.0, 50000.0, 20000.0, 300000.0]
     })
     
