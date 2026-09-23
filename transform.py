@@ -4,33 +4,26 @@ CAT_COL_1 = "countryorigin_iso3"
 CAT_COL_2 = "tq"
 MEASURE_COL = "dutiablevaluephp"
 
-def group_by_single(df: pd.DataFrame, group_col: str = "countryorigin_iso3") -> pd.DataFrame:
-    """
-    Group by one column and sum the key value columns.
-    Works on a full DataFrame OR on a partial-sum DataFrame (chunk results),
-    since summing already-summed rows again is still correct.
-    """
+def group_by_single(df: pd.DataFrame, group_col: str = CAT_COL_1,
+                     measure_col: str = MEASURE_COL) -> pd.DataFrame:
+    """Group by one category column; report count, valid count, sum, mean."""
+    result = df.groupby(group_col, dropna=False).agg(
+        row_count=(measure_col, "size"),
+        valid_count=(measure_col, "count"),   # excludes NaN
+        sum=(measure_col, "sum"),
+        mean=(measure_col, "mean"),
+    ).reset_index()
+    return result.sort_values("sum", ascending=False)
 
-    result = (
-        df.groupby(group_col, dropna=False)[["dutiestaxes", "dutiablevaluephp"]]
-        .sum()
-        .reset_index()
-        .sort_values("dutiestaxes", ascending=False)
-    )
-    return result
-
-def group_by_two(
-    df: pd.DataFrame,
-    group_cols=("countryorigin_iso3", "port"),
-) -> pd.DataFrame:
-    """Group by two columns and sum dutiestaxes."""
-    result = (
-        df.groupby(list(group_cols), dropna=False)["dutiestaxes"]
-        .sum()
-        .reset_index()
-        .sort_values("dutiestaxes", ascending=False)
-    )
-    return result
+def group_by_two(df: pd.DataFrame,
+                  group_cols=(CAT_COL_1, CAT_COL_2),
+                  measure_col: str = MEASURE_COL) -> pd.DataFrame:
+    """Group by both category columns; report row count and measure sum."""
+    result = df.groupby(list(group_cols), dropna=False).agg(
+        row_count=(measure_col, "size"),
+        sum=(measure_col, "sum"),
+    ).reset_index()
+    return result.sort_values("sum", ascending=False)
 
 def pivot_with_margins(
     df: pd.DataFrame,
