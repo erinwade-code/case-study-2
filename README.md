@@ -24,3 +24,17 @@ validate.py - validation and audit log
 ## Reminders
 1. Commit regularly on your part
 2. When your part is done, open a pull request so that another member can review your part before merging
+
+Markdown
+## Data Filtering and Transformation Rules (Gab - Work B)
+
+### Filter Rules
+Filtering is performed using `pandas.loc` with a boolean mask combining two strict conditions:
+1. **Origin Country Constraint (`countryorigin_iso3`):** Selected records must have an ISO3 origin code equal to `'CHN'` (China).
+2. **Transaction Quantity Constraint (`tq`):** Selected records must have a Tariff Quantity (`tq`) strictly greater than `0`.
+
+### Derived Columns
+1. **`estimated_duty_php` (Numerical Measure):**
+   * **Formula:** `dutiablevaluephp * duty_rate` (default `duty_rate = 0.05` or 5%).
+2. **`value_category_flag` (Category / Flag):**
+   * **Formula:** Binary flag assigned based on the median `dutiablevaluephp` of filtered records (`High_Value` vs `Low_Value`).
