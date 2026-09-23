@@ -1,5 +1,9 @@
 import pandas as pd
 
+CAT_COL_1 = "countryorigin_iso3"
+CAT_COL_2 = "tq"
+MEASURE_COL = "dutiablevaluephp"
+
 def group_by_single(df: pd.DataFrame, group_col: str = "countryorigin_iso3") -> pd.DataFrame:
     """
     Group by one column and sum the key value columns.
