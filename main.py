@@ -5,9 +5,7 @@ import pandas as pd
 import transform
 
 CHUNKSIZE = 200_000
-REQUIRED_COLUMNS = {
-    "countryorigin_iso3", "port", "tm", "dutiestaxes", "dutiablevaluephp",
-}
+REQUIRED_COLUMNS = {transform.CAT_COL_1, transform.CAT_COL_2, transform.MEASURE_COL}
  
  
 def validate_input(path: str) -> None:
@@ -30,34 +28,37 @@ def process_in_chunks(path: str):
     """
     Loop to process records/chunks/outputs.
     Reads the (large) CSV in chunks, applies extract/clean (placeholders
-    for now), and accumulates partial aggregates so we never hold the
-    full 2.2M-row file in memory at once.
+    for now), and accumulates partial aggregates per chunk so the full
+    2.2M-row file is never held in memory at once.
     """
-    single_partials = []
-    two_partials = []
-    port_sums: dict[str, dict[str, float]] = {}
+    single_partials = []   # per-chunk group_by_single results
+    two_partials = []      # per-chunk group_by_two results
+    missing_counts: dict[str, dict[str, int]] = {}  # for the standalone function
  
     reader = pd.read_csv(
         path, chunksize=CHUNKSIZE, encoding="latin1", low_memory=False
     )
  
     for i, chunk in enumerate(reader, start=1):
+        # --- Work A / Work B would slot in here ---
+        # chunk = clean.clean_chunk(chunk)
+ 
         single_partials.append(transform.group_by_single(chunk))
-        two_partials.append(
-            transform.group_by_two(chunk, group_cols=("countryorigin_iso3", "tm"))
+        two_partials.append(transform.group_by_two(chunk))
+ 
+        # Running row_count / valid_count per country, for missing_value_report
+        chunk_counts = chunk.groupby(transform.CAT_COL_1)[transform.MEASURE_COL].agg(
+            row_count="size", valid_count="count"
         )
-
-        port_chunk_sums = (
-            chunk.groupby("port")[["dutiestaxes", "dutiablevaluephp"]].sum()
-        )
-        for port, row in port_chunk_sums.iterrows():
-            entry = port_sums.setdefault(port, {"dutiestaxes": 0.0, "dutiablevaluephp": 0.0})
-            entry["dutiestaxes"] += row["dutiestaxes"]
-            entry["dutiablevaluephp"] += row["dutiablevaluephp"]
+        for country, row in chunk_counts.iterrows():
+            entry = missing_counts.setdefault(country, {"row_count": 0, "valid_count": 0})
+            entry["row_count"] += int(row["row_count"])
+            entry["valid_count"] += int(row["valid_count"])
  
         print(f"  processed chunk {i} ({len(chunk):,} rows)")
  
-    return single_partials, two_partials, port_sums
+    return single_partials, two_partials, missing_counts
+ 
 
 def main():
     path = sys.argv[1] if len(sys.argv) > 1 else "2015.csv"
