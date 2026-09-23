@@ -60,6 +60,29 @@ def process_in_chunks(path: str):
     return single_partials, two_partials, missing_counts
  
 
+def combine_single(partials: list[pd.DataFrame]) -> pd.DataFrame:
+    """Re-aggregate per-chunk group_by_single results into final totals."""
+    combined = pd.concat(partials, ignore_index=True)
+    result = combined.groupby(transform.CAT_COL_1, dropna=False).agg(
+        row_count=("row_count", "sum"),
+        valid_count=("valid_count", "sum"),
+        sum=("sum", "sum"),
+    ).reset_index()
+    result["mean"] = result["sum"] / result["valid_count"]
+    return result.sort_values("sum", ascending=False)
+ 
+ 
+def combine_two(partials: list[pd.DataFrame]) -> pd.DataFrame:
+    """Re-aggregate per-chunk group_by_two results into final totals."""
+    combined = pd.concat(partials, ignore_index=True)
+    result = combined.groupby(
+        [transform.CAT_COL_1, transform.CAT_COL_2], dropna=False
+    ).agg(
+        row_count=("row_count", "sum"),
+        sum=("sum", "sum"),
+    ).reset_index()
+    return result.sort_values("sum", ascending=False)
+ 
 def main():
     path = sys.argv[1] if len(sys.argv) > 1 else "2015.csv"
  
