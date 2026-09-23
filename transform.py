@@ -51,3 +51,27 @@ def pivot_with_margins(
         fill_value=0,
     )
     return pivot
+
+def top10(grouped_df: pd.DataFrame, value_col: str = "dutiestaxes") -> pd.DataFrame:
+    """Return the top 10 rows of an already-grouped DataFrame by value_col."""
+    return grouped_df.sort_values(value_col, ascending=False).head(10)
+
+def duty_rate_summary(port_sums: dict) -> pd.DataFrame:
+    """
+    Compute effective duty rate (dutiestaxes / dutiablevaluephp) per port.
+ 
+    port_sums: dict like
+        {
+          "Port of Manila": {"dutiestaxes": 123.0, "dutiablevaluephp": 456.0},
+          ...
+        }
+    """
+    rows = []
+    for port, sums in port_sums.items():
+        taxes = sums.get("dutiestaxes", 0)
+        value = sums.get("dutiablevaluephp", 0)
+        rate = (taxes / value) if value else 0
+        rows.append({"port": port, "dutiestaxes": taxes,
+                      "dutiablevaluephp": value, "effective_duty_rate": rate})
+    return pd.DataFrame(rows).sort_values("effective_duty_rate", ascending=False)
+ 
