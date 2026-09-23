@@ -4,6 +4,9 @@
 
 ## Information and Rules
 
+### Configuration
+Download the 2015.csv from https://huggingface.co/datasets/bettergovph/open-customs-data/resolve/main/yearly/csv/2015.csv?download=true, Downloaded on September 22, 2026, the file size is ~493.5 MB, so download with decent WIFI connection and storage in your unit. Place it in data/raw/ inside the project folder.
+
 ### Loader Feature
 In this feature, here are the necessary data dictionaries that are important on our analysis that will be used to investigate and find summaries or description based on the 2015 Bureau of Customs open data.
 
