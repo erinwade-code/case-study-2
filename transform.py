@@ -25,27 +25,18 @@ def group_by_two(df: pd.DataFrame,
     ).reset_index()
     return result.sort_values("sum", ascending=False)
 
-def pivot_with_margins(
-    df: pd.DataFrame,
-    index: str = "port",
-    columns: str = "tm",
-    values: str = "dutiestaxes",
-) -> pd.DataFrame:
+def pivot_with_margins(df: pd.DataFrame,
+                        index: str = CAT_COL_1,
+                        columns: str = CAT_COL_2,
+                        values: str = "sum") -> pd.DataFrame:
     """
     Build a pivot table with row/column totals (margins=True).
-    Expects df to already be aggregated at (index, columns) level
-    -- i.e. call this on the output of group_by_two-style data,
-    so pivoting large raw data isn't required.
+    Expects df already aggregated at (index, columns) level, i.e. the
+    output of group_by_two, so re-scanning raw data isn't required.
     """
     pivot = pd.pivot_table(
-        df,
-        index=index,
-        columns=columns,
-        values=values,
-        aggfunc="sum",
-        margins=True,
-        margins_name="Total",
-        fill_value=0,
+        df, index=index, columns=columns, values=values,
+        aggfunc="sum", margins=True, margins_name="Total", fill_value=0,
     )
     return pivot
 
