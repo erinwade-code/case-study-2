@@ -2,7 +2,7 @@ import os
 import sys
 import pandas as pd
 
-import transform
+from src import grouping
 
 CHUNKSIZE = 200_000
 REQUIRED_COLUMNS = {transform.CAT_COL_1, transform.CAT_COL_2, transform.MEASURE_COL}
