@@ -45,3 +45,22 @@ def filter_and_transform_data(
     excluded_rows = rows_before - rows_after
 
     return filtered_df, excluded_rows
+# --- Local Standalone Unit Test ---
+if __name__ == "__main__":
+    print("Testing Work B transformation logic...")
+    mock_data = pd.DataFrame({
+        "countryorigin_iso3": ["CHN", "USA", "CHN", "CHN"],
+        "tq": [10, 5, 0, 25],
+        "dutiablevaluephp": [100000.0, 50000.0, 20000.0, 300000.0]
+    })
+    
+    mock_config = {
+        "FILTER_COL_1": "countryorigin_iso3",
+        "FILTER_VAL_1": "CHN",
+        "FILTER_COL_2": "tq",
+        "FILTER_VAL_2": 0,
+        "NUMERICAL_MEASURE": "dutiablevaluephp"
+    }
+
+    filtered_res, excluded_count = filter_and_transform_data(mock_data, mock_config)
+    print(f"Excluded rows count: {excluded_count}")
