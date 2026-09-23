@@ -118,3 +118,10 @@ def check_loop_vs_vectorized(loop_result: float, vectorized_result: float) -> di
         actual=vectorized_result,
         tolerance=ABSOLUTE_TOLERANCE
     )
+
+def build_validation_table(all_checks: list[dict[str, Any]]) -> pd.DataFrame:
+    return pd.DataFrame(all_checks)
+
+
+def save_validation_csv(validation_df: pd.DataFrame, output_folder: str) -> None:
+    validation_df.to_csv(f"{output_folder}/validation.csv", index=False)

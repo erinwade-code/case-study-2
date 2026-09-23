@@ -20,3 +20,5 @@ env/
 Thumbs.db
 
 test_1.py
+
+outputs/
