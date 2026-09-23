@@ -3,7 +3,15 @@
 # Dataset Chosen:
 
 ## Information and Rules
-(Put information and rules here about your part)
+
+### Loader Feature
+In this feature, here are the necessary data dictionaries that are important on our analysis that will be used to investigate and find summaries or description based on the 2015 Bureau of Customs open data.
+
+| Field | Meaning | Unit | Assumptions |
+|---|---|---|---|
+| countryorigin_iso3 | Country the goods originated from | ISO3 country code | These goods were sourced from this country |
+| tq | Year + Quarter the goods were imported | quarter code (e.g. 2015q1) | Reflects the transaction quarter, not necessarily arrival date |
+| dutiablevaluephp | Customs-assessed value of the imported goods | PHP | Converted from foreign currency using the transaction's exchange rate |
 
 ## Project Structure
 main.py - entry point
