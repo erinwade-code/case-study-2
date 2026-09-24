@@ -3,7 +3,18 @@
 # Dataset Chosen:
 
 ## Information and Rules
-(Put information and rules here about your part)
+
+### Configuration
+Download the 2015.csv from https://huggingface.co/datasets/bettergovph/open-customs-data/resolve/main/yearly/csv/2015.csv?download=true, Downloaded on September 22, 2026, the file size is ~493.5 MB, so download with decent WIFI connection and storage in your unit. Place it in data/raw/ inside the project folder.
+
+### Loader Feature
+In this feature, here are the necessary data dictionaries that are important on our analysis that will be used to investigate and find summaries or description based on the 2015 Bureau of Customs open data.
+
+| Field | Meaning | Unit | Assumptions |
+|---|---|---|---|
+| countryorigin_iso3 | Country the goods originated from | ISO3 country code | These goods were sourced from this country |
+| tq | Year + Quarter the goods were imported | quarter code (e.g. 2015q1) | Reflects the transaction quarter, not necessarily arrival date |
+| dutiablevaluephp | Customs-assessed value of the imported goods | PHP | Converted from foreign currency using the transaction's exchange rate |
 
 ## Project Structure
 main.py - entry point
