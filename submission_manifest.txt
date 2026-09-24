@@ -1,0 +1,3 @@
+Repository URL: https://github.com/erinwade-code/case-study-2
+Release tag: week6-v1.0
+Full commit hash: 7b8e373d2a950e17e906261180650f4ebaf00c19
