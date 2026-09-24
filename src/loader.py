@@ -1,37 +1,43 @@
-import pandas as pd
-import config
 import os
+from typing import Any
 
-class Loader():
-    def __init__(self, config):
-        self.config = config
-        self.df = None
+import pandas as pd
 
-    def _check_columns(self, available):
+
+class Loader:
+    """Loads the 2015 customs CSV, validates required columns, and summarises it."""
+
+    def __init__(self, config: dict[str, Any]) -> None:
+        # config is the dictionary from config.py, passed in by main.py:
+        #     Loader(config)
+        self.config: dict[str, Any] = config
+        self.df: pd.DataFrame | None = None  # filled in by load()
+
+    def _check_columns(self, available: pd.Index | list[str]) -> None:
         """Raise a clear error if any required column is missing."""
-        required = self.config["required_columns"]
-        missing = [col for col in required if col not in available]
+        required: list[str] = self.config["required_columns"]
+        missing: list[str] = [col for col in required if col not in available]
         if missing:
             raise ValueError(
                 f"Missing required column(s): {missing}. "
                 f"Columns available: {list(available)}"
             )
-            
-    def load(self):
-        path = self.config["input_path"]
 
-        # 1. Missing file error case
+    def load(self) -> pd.DataFrame:
+        path: str = self.config["input_path"]
+
+        # 1. Missing file error case (look-before-you-leap, no try/except).
         if not os.path.isfile(path):
             raise FileNotFoundError(
                 f"Input file not found: {path}. "
                 "Download 2015.csv and place it in that folder (see README)."
             )
 
-        # Read ONLY the header row (nrows=0) - fast even for a 493 MB file - so a missing column fails immediately, before the big read.
-        header = pd.read_csv(path, encoding="latin-1", nrows=0)
+        # 2. Read ONLY the header row so a missing column fails before the big read.
+        header: pd.DataFrame = pd.read_csv(path, encoding="latin-1", nrows=0)
         self._check_columns(header.columns)
 
-        # Now read the full file, keeping only the columns we need (usecols). This saves a lot of memory versus loading every column.
+        # 3. Read the full file, keeping only the columns we need.
         self.df = pd.read_csv(
             path,
             encoding="latin-1",
@@ -39,7 +45,7 @@ class Loader():
         )
         return self.df
 
-    def validate_columns(self):
+    def validate_columns(self) -> pd.DataFrame:
         """Check the loaded DataFrame has every required column and keep only those."""
         if self.df is None:
             raise ValueError("No data loaded. Call load() before validate_columns().")
@@ -48,18 +54,18 @@ class Loader():
         self.df = self.df[self.config["required_columns"]]
         return self.df
 
-    def describe(self):
+    def describe(self) -> dict[str, Any]:
+        """Return a summary dictionary (main.py decides whether to print or save it)."""
         if self.df is None:
             raise ValueError("No data loaded. Call load() before describe().")
 
-        summary = {
+        summary: dict[str, Any] = {
             "shape": self.df.shape,
             "dtypes": self.df.dtypes.astype(str).to_dict(),
             "missing_values": self.df.isna().sum().to_dict(),
         }
 
         if "tq" in self.df.columns:
-            summary["tq_range"] = (self.df["tq"].min(), self.df["tq"].max())
             summary["tq_unique"] = sorted(self.df["tq"].dropna().unique().tolist())
 
         if "countryorigin_iso3" in self.df.columns:
