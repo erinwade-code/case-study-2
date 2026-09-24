@@ -5,7 +5,7 @@ import pandas as pd
 from src import grouping
 
 CHUNKSIZE = 200_000
-REQUIRED_COLUMNS = {transform.CAT_COL_1, transform.CAT_COL_2, transform.MEASURE_COL}
+REQUIRED_COLUMNS = {grouping.CAT_COL_1, grouping.CAT_COL_2, grouping.MEASURE_COL}
  
  
 def validate_input(path: str) -> None:
@@ -40,10 +40,10 @@ def process_in_chunks(path: str):
  
     for i, chunk in enumerate(reader, start=1):
  
-        single_partials.append(transform.group_by_single(chunk))
-        two_partials.append(transform.group_by_two(chunk))
+        single_partials.append(grouping.group_by_single(chunk))
+        two_partials.append(grouping.group_by_two(chunk))
  
-        chunk_counts = chunk.groupby(transform.CAT_COL_1)[transform.MEASURE_COL].agg(
+        chunk_counts = chunk.groupby(grouping.CAT_COL_1)[grouping.MEASURE_COL].agg(
             row_count="size", valid_count="count"
         )
         for country, row in chunk_counts.iterrows():
@@ -59,7 +59,7 @@ def process_in_chunks(path: str):
 def combine_single(partials: list[pd.DataFrame]) -> pd.DataFrame:
     """Re-aggregate per-chunk group_by_single results into final totals."""
     combined = pd.concat(partials, ignore_index=True)
-    result = combined.groupby(transform.CAT_COL_1, dropna=False).agg(
+    result = combined.groupby(grouping.CAT_COL_1, dropna=False).agg(
         row_count=("row_count", "sum"),
         valid_count=("valid_count", "sum"),
         sum=("sum", "sum"),
@@ -72,7 +72,7 @@ def combine_two(partials: list[pd.DataFrame]) -> pd.DataFrame:
     """Re-aggregate per-chunk group_by_two results into final totals."""
     combined = pd.concat(partials, ignore_index=True)
     result = combined.groupby(
-        [transform.CAT_COL_1, transform.CAT_COL_2], dropna=False
+        [grouping.CAT_COL_1, grouping.CAT_COL_2], dropna=False
     ).agg(
         row_count=("row_count", "sum"),
         sum=("sum", "sum"),
@@ -91,10 +91,10 @@ def main():
     print("Combining chunk results...")
     grouped = combine_single(single_partials)
     grouped_two = combine_two(two_partials)
-    pivot = transform.pivot_with_margins(grouped_two)
-    top_10 = transform.top10(grouped)
+    pivot = grouping.pivot_with_margins(grouped_two)
+    top_10 = grouping.top10(grouped)
  
-    missing_report = transform.missing_value_report(missing_counts)
+    missing_report = grouping.missing_value_report(missing_counts)
  
     grouped.to_csv("grouped.csv", index=False)
     grouped_two.to_csv("grouped_two.csv", index=False)
