@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import numpy as np
 
 
 def make_bar_plot(
@@ -34,25 +35,31 @@ def make_heatmap(
     output_path: str,
 ) -> None:
     """Create and save a Seaborn heatmap."""
-    plt.figure(figsize=(12, 24))
+    plt.figure(figsize=(12, 40))
 
     vmax = data.stack().quantile(0.99)
 
-    sns.heatmap(
+    ax = sns.heatmap(
         data,
         cmap="YlOrRd",
         linewidths=0.2,
         linecolor="white",
         vmin=0,
         vmax=vmax,
+        yticklabels=True,
+        xticklabels=True,
         cbar_kws={"label": "Dutiable Value (PHP)"},
     )
+
+    ax.tick_params(axis="y", labelsize=6)
+    plt.yticks(rotation=0)
+    plt.xticks(rotation=0)
 
     plt.title(title)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
-    plt.xticks(rotation=0)
-    plt.yticks(fontsize=6)
+
+    print(len(ax.get_yticklabels()), "labels for", len(data), "rows")
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches="tight")
