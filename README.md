@@ -2,7 +2,7 @@
 
 # Dataset Chosen: 2015.csv
 
-## Information and Rules
+## Information about features
 1. feature/data-loader:Implemented chunked CSV ingestion in `src/loader.py` to handle large datasets efficiently without overflowing memory.
 2. feature/data-transformation: Created filtering rules and derived calculated metrics inside `src/transform.py` to clean and standardize raw records.
 3. feature/grouping-aggregations: Built grouping methods in `src/grouping.py` for single/double-variable aggregations, pivot table generation, and missing value reporting.
@@ -14,7 +14,7 @@
 Download the 2015.csv from https://huggingface.co/datasets/bettergovph/open-customs-data/resolve/main/yearly/csv/2015.csv?download=true, Downloaded on September 22, 2026, the file size is ~493.5 MB, so download with decent WIFI connection and storage in your unit. Place it in data/raw/ inside the project folder.
 
 ### Loading the dataset
-In this feature, here are the necessary data dictionaries that are important on our analysis that will be used to investigate and find summaries or description based on the 2015 Bureau of Customs open data.
+Here are the necessary data dictionaries that are important on our analysis that will be used to investigate and find summaries or description based on the 2015 Bureau of Customs open data.
 
 | Field | Meaning | Unit | Assumptions |
 |---|---|---|---|
