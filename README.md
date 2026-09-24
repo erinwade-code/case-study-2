@@ -3,23 +3,12 @@
 # Dataset Chosen: 2015.csv
 
 ## Information and Rules
-`feature/data-loader`
-Implemented chunked CSV ingestion in `src/loader.py` to handle large datasets efficiently without overflowing memory.
--
-`feature/data-transformation`
-Created filtering rules and derived calculated metrics inside `src/transform.py` to clean and standardize raw records.
--
-`feature/grouping-aggregations`
-Built grouping methods in `src/grouping.py` for single/double-variable aggregations, pivot table generation, and missing value reporting.
--
-`feature/numpy-benchmarking`
-Developed vectorized and loop-based performance comparisons in `src/numpy_ops.py` using fixed random seeds.
--
-`feature/data-validation`
-Implemented automated audit trail logging (`AuditLog`) and structural integrity checks in `src/validate.py`.
--
-`feature/numpy_ops'
-Designed automated charting utilities in `src/plots.py` to render and export heatmap and bar chart visualizations.
+1. feature/data-loader:Implemented chunked CSV ingestion in `src/loader.py` to handle large datasets efficiently without overflowing memory.
+2. feature/data-transformation: Created filtering rules and derived calculated metrics inside `src/transform.py` to clean and standardize raw records.
+3. feature/grouping-aggregations: Built grouping methods in `src/grouping.py` for single/double-variable aggregations, pivot table generation, and missing value reporting.
+4. feature/numpy-benchmarking: Developed vectorized and loop-based performance comparisons in `src/numpy_ops.py` using fixed random seeds.
+5. feature/data-validation: Implemented automated audit trail logging (`AuditLog`) and structural integrity checks in `src/validate.py`.
+6. feature/numpy_ops: Designed automated charting utilities in `src/plots.py` to render and export heatmap and bar chart visualizations.
 
 ### Configuration
 Download the 2015.csv from https://huggingface.co/datasets/bettergovph/open-customs-data/resolve/main/yearly/csv/2015.csv?download=true, Downloaded on September 22, 2026, the file size is ~493.5 MB, so download with decent WIFI connection and storage in your unit. Place it in data/raw/ inside the project folder.
