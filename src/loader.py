@@ -3,10 +3,20 @@ import config
 import os
 
 class Loader():
-    def __init__(self, config, df):
+    def __init__(self, config):
         self.config = config
         self.df = None
 
+    def _check_columns(self, available):
+        """Raise a clear error if any required column is missing."""
+        required = self.config["required_columns"]
+        missing = [col for col in required if col not in available]
+        if missing:
+            raise ValueError(
+                f"Missing required column(s): {missing}. "
+                f"Columns available: {list(available)}"
+            )
+            
     def load(self):
         path = self.config["input_path"]
 
