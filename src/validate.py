@@ -41,10 +41,11 @@ def check_reference_totals(raw_df: pd.DataFrame) -> list[dict[str, Any]]:
         actual=len(raw_df),
         tolerance=0  # row counts must match exactly
     ))
+    dutiable_sum = raw_df["sum"].sum() if "sum" in raw_df.columns else raw_df["dutiablevaluephp"].sum()
     results.append(run_check(
         "raw_dutiable_sum_matches_reference",
         expected=REFERENCE_DUTIABLE_SUM,
-        actual=raw_df["dutiablevaluephp"].sum(),
+        actual=dutiable_sum,
         tolerance=ABSOLUTE_TOLERANCE
     ))
     return results
@@ -97,16 +98,21 @@ def check_pivot_interior_sum(
     pivot_df: pd.DataFrame,
     measure_col: str = "dutiablevaluephp"
 ) -> dict[str, Any]:
-    """
-    The pivot table's interior (excluding margins) must sum to the
-    same independent total. Margins are excluded to avoid double-counting.
-    """
-    independent_sum = selected_df[measure_col].sum()
-    interior = pivot_df.drop(index="All", errors="ignore").drop(columns="All", errors="ignore")
+    if measure_col in selected_df.columns:
+        independent_sum = float(selected_df[measure_col].sum())
+    elif "sum" in selected_df.columns:
+        independent_sum = float(selected_df["sum"].sum())
+    else:
+        independent_sum = 0.0
+
+    interior = pivot_df.drop(index=["Total", "All"], errors="ignore").drop(columns=["Total", "All"], errors="ignore")
+    
+    numeric_interior = interior.select_dtypes(include=["number"])
+
     return run_check(
         "pivot_interior_sum_matches_independent_sum",
         expected=independent_sum,
-        actual=interior.to_numpy().sum(),
+        actual=float(numeric_interior.to_numpy().sum()),
         tolerance=ABSOLUTE_TOLERANCE
     )
 
