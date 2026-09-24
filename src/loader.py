@@ -9,10 +9,24 @@ class Loader():
 
     def load(self):
         path = self.config["input_path"]
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"File not found: {path}")
 
-        self.df = pd.read_csv(path, encoding="latin-1")
+        # 1. Missing file error case
+        if not os.path.isfile(path):
+            raise FileNotFoundError(
+                f"Input file not found: {path}. "
+                "Download 2015.csv and place it in that folder (see README)."
+            )
+
+        # Read ONLY the header row (nrows=0) - fast even for a 493 MB file - so a missing column fails immediately, before the big read.
+        header = pd.read_csv(path, encoding="latin-1", nrows=0)
+        self._check_columns(header.columns)
+
+        # Now read the full file, keeping only the columns we need (usecols). This saves a lot of memory versus loading every column.
+        self.df = pd.read_csv(
+            path,
+            encoding="latin-1",
+            usecols=self.config["required_columns"],
+        )
         return self.df
 
     def describe(self):
