@@ -39,6 +39,15 @@ class Loader():
         )
         return self.df
 
+    def validate_columns(self):
+        """Check the loaded DataFrame has every required column and keep only those."""
+        if self.df is None:
+            raise ValueError("No data loaded. Call load() before validate_columns().")
+
+        self._check_columns(self.df.columns)
+        self.df = self.df[self.config["required_columns"]]
+        return self.df
+
     def describe(self):
         if self.df is None:
             raise ValueError("No data loaded. Call load() before describe().")
